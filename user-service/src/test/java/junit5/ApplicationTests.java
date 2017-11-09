@@ -1,38 +1,35 @@
 package junit5;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import sample.Application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
+@Tag("unit")
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ApplicationTests {
 
-    private MockMvc mockMvc;
-
     @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-    }
+    private TestRestTemplate restTemplate;
 
     @Test
-    public void testAbout() throws Exception {
-        MvcResult result = mockMvc.perform(get("/about")).andReturn();
-        assertEquals("JUnit 5 and Spring Boot Example.", result.getResponse().getContentAsString());
+    public void testHello() throws Exception {
+        String result = restTemplate.getForEntity("/hello", String.class).getBody();
+        assertEquals("Hello from HelloService", result);
     }
 
+
+    @Test
+    public void testIsAlive() throws Exception {
+        Boolean result = restTemplate.getForEntity("/isAlive", Boolean.class).getBody();
+        assertEquals(true, result);
+    }
 }
